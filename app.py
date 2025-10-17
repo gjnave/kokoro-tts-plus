@@ -248,7 +248,13 @@ def generate_all(text, voice='af_heart', speed=1, use_gpu=CUDA_AVAILABLE, stream
                 yield 24000, torch.zeros(1).numpy()
 
 def process_file_with_timestamps(file, voice='af_heart', speed=1, use_gpu=CUDA_AVAILABLE):
-    text = normalize_text(process_file(file.name))
+    chapters = process_file(file.name)
+    if isinstance(chapters, dict) and 'error' in chapters:
+        raise gr.Error(chapters['error'])
+    
+    text = " ".join(chapter['text'] for chapter in chapters)
+    text = normalize_text(text)
+
     text = text if CHAR_LIMIT is None else text[:CHAR_LIMIT]
     pipeline = pipelines[voice[0]]
     pack = pipeline.load_voice(voice)
@@ -258,7 +264,7 @@ def process_file_with_timestamps(file, voice='af_heart', speed=1, use_gpu=CUDA_A
     for gs, ps, tks in pipeline(text, voice, speed, model=models[use_gpu]):
         ref_s = pack[min(len(ps)-1, 509)]
         audio = forward_gpu(ps, ref_s, speed) if use_gpu else models[False](ps, ref_s, speed)
-        chunks.append(audio.numpy())
+        chunks.append((24000, audio.numpy()))
         if tks and tks[0].start_ts is not None:
             for t in tks:
                 if t.start_ts is None or t.end_ts is None:
@@ -497,13 +503,6 @@ with gr.Blocks() as stream_tab:
     with gr.Row():
         stream_btn = gr.Button('Stream', variant='primary')
         stop_btn = gr.Button('Stop', variant='stop')
-        stream_file_btn = gr.Button('Stream File', variant='primary')  # Ensure this is defined here
-        process_btn = gr.Button('Process and Save Chapters', variant='secondary')
-    with gr.Row():
-        file_upload = gr.File(label="Upload EPUB/PDF/TXT")
-    gr.Markdown("Upload a file and click 'Process and Save Chapters' to extract and save chapters for later use.")
-    status = gr.Textbox(label="Status", interactive=False)
-    file_viewer = gr.HTML(label="File Viewer")
     chunk_state = gr.State(value=[])
     streaming_active = gr.State(value=False)
     gr.HTML("""
@@ -542,7 +541,9 @@ with gr.Blocks() as app:
     gr.Markdown(BANNER_TEXT)
     with gr.Row():
         with gr.Column():
-            gr.Markdown("### Load Pre-processed Document")
+            gr.Markdown("### Upload and Process Document")
+            file_upload = gr.File(label="Upload EPUB/PDF/TXT")
+            status = gr.Textbox(label="Status", interactive=False)
             with gr.Row():
                 document_dropdown = gr.Dropdown(
                     label="Select Document",
@@ -569,7 +570,7 @@ with gr.Blocks() as app:
     # Event handlers
     document_dropdown.change(fn=get_chapters, inputs=[document_dropdown], outputs=[chapter_dropdown])
     chapter_dropdown.change(fn=load_chapter_text, inputs=[document_dropdown, chapter_dropdown], outputs=[text])
-    process_btn.click(fn=process_and_save, inputs=[file_upload], outputs=[document_dropdown, chapter_dropdown, status])
+    file_upload.upload(fn=process_and_save, inputs=[file_upload], outputs=[document_dropdown, chapter_dropdown, status])
     random_btn.click(fn=get_random_quote, inputs=[], outputs=[text])
     gatsby_btn.click(fn=get_gatsby, inputs=[], outputs=[text])
     frankenstein_btn.click(fn=get_frankenstein, inputs=[], outputs=[text])
@@ -585,18 +586,7 @@ with gr.Blocks() as app:
         outputs=[out_stream]
     )
 
-    file_stream_event = stream_file_btn.click(
-        fn=lambda: (True, None),
-        outputs=[streaming_active, out_stream]
-    ).then(
-        fn=stream_file,
-        inputs=[file_upload, voice, speed, use_gpu],
-        outputs=[chunk_state, file_viewer]
-    ).then(
-        fn=stream_audio_from_chunks,
-        inputs=[chunk_state, streaming_active],
-        outputs=[out_stream]
-    )
+
 
     stop_btn.click(
         fn=lambda: False,
@@ -609,3 +599,4 @@ with gr.Blocks() as app:
 
 if __name__ == '__main__':
     app.queue(api_open=API_OPEN).launch(share=API_OPEN)
+
