@@ -497,13 +497,7 @@ with gr.Blocks() as stream_tab:
     with gr.Row():
         stream_btn = gr.Button('Stream', variant='primary')
         stop_btn = gr.Button('Stop', variant='stop')
-        stream_file_btn = gr.Button('Stream File', variant='primary')  # Ensure this is defined here
-        process_btn = gr.Button('Process and Save Chapters', variant='secondary')
-    with gr.Row():
-        file_upload = gr.File(label="Upload EPUB/PDF/TXT")
-    gr.Markdown("Upload a file and click 'Process and Save Chapters' to extract and save chapters for later use.")
-    status = gr.Textbox(label="Status", interactive=False)
-    file_viewer = gr.HTML(label="File Viewer")
+        stream_file_btn = gr.Button('Stream File', variant='primary')
     chunk_state = gr.State(value=[])
     streaming_active = gr.State(value=False)
     gr.HTML("""
@@ -542,7 +536,9 @@ with gr.Blocks() as app:
     gr.Markdown(BANNER_TEXT)
     with gr.Row():
         with gr.Column():
-            gr.Markdown("### Load Pre-processed Document")
+            gr.Markdown("### Upload and Process Document")
+            file_upload = gr.File(label="Upload EPUB/PDF/TXT")
+            status = gr.Textbox(label="Status", interactive=False)
             with gr.Row():
                 document_dropdown = gr.Dropdown(
                     label="Select Document",

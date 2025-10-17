@@ -17,10 +17,32 @@ A CLI text-to-speech tool using the Kokoro model, supporting multiple languages,
 - Chapter merging capability
 - Detailed debug output option
 - GPU Support
+- Gradio-based Graphical User Interface (GUI)
+
+## Gradio GUI
+
+The Gradio GUI provides an intuitive and user-friendly interface for Kokoro TTS.
+
+### Running the GUI
+
+To launch the Gradio web interface, run the following command:
+
+```bash
+python app.py
+```
+
+This will start a local web server, and you can access the GUI by opening the provided URL in your web browser.
+
+### GUI Features
+
+-   **File Upload:** Easily upload and process `.txt`, `.epub`, and `.pdf` files.
+-   **Chapter Extraction:** Automatically extracts chapters from EPUB and PDF documents.
+-   **Interactive Controls:** Adjust voice, speed, and other settings with interactive sliders and dropdowns.
+-   **Streaming Audio:** Listen to the generated audio in real-time.
 
 ## Demo
 
-Kokoro TTS is an open-source CLI tool that delivers high-quality text-to-speech right from your terminal. Think of it as your personal voice studio, capable of transforming any text into natural-sounding speech with minimal effort.
+Kokoro TTS is an open-source tool that delivers high-quality text-to-speech right from your terminal or through a user-friendly web interface. Think of it as your personal voice studio, capable of transforming any text into natural-sounding speech with minimal effort.
 
 https://github.com/user-attachments/assets/8413e640-59e9-490e-861d-49187e967526
 
@@ -30,7 +52,16 @@ https://github.com/user-attachments/assets/8413e640-59e9-490e-861d-49187e967526
 
 - [x] Add GPU support
 - [x] Add PDF support
-- [ ] Add GUI
+- [x] Add GUI
+
+## Getting Started
+
+This repository provides two ways to use Kokoro TTS:
+
+1.  **Gradio GUI (Recommended for ease of use):** A user-friendly web interface for generating speech from text, EPUB, and PDF files. Ideal for interactive use and exploring different voices and settings.
+2.  **Command-Line Interface (CLI):** A powerful tool for advanced users and automation. Suitable for batch processing, scripting, and integration with other programs.
+
+Choose the one that best fits your needs.
 
 ## Prerequisites
 
