@@ -565,7 +565,6 @@ with gr.Blocks() as app:
     # Event handlers
     document_dropdown.change(fn=get_chapters, inputs=[document_dropdown], outputs=[chapter_dropdown])
     chapter_dropdown.change(fn=load_chapter_text, inputs=[document_dropdown, chapter_dropdown], outputs=[text])
-    process_btn.click(fn=process_and_save, inputs=[file_upload], outputs=[document_dropdown, chapter_dropdown, status])
     random_btn.click(fn=get_random_quote, inputs=[], outputs=[text])
     gatsby_btn.click(fn=get_gatsby, inputs=[], outputs=[text])
     frankenstein_btn.click(fn=get_frankenstein, inputs=[], outputs=[text])
